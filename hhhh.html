@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screen Time Manager</title>
+  <style>
+    :root {
+      --bg-day: #f8faff;
+      --bg-night: #0e0e1a;
+      --text-day: #1a1a1a;
+      --text-night: #ffffff;
+      --button-bg: linear-gradient(90deg, #ae30ff, #3dd7ff);
+      --button-text: #ffffff;
+      --header-bg-day: #ffffffd9;
+      --header-bg-night: #181828cc;
+      --section-bg-day: #ffffffdd;
+      --section-bg-night: #1e1e2eaa;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-night);
+      color: var(--text-night);
+      margin: 0;
+      padding: 0;
+      transition: all 0.4s ease-in-out;
+    }
+    body.day-mode {
+      background: var(--bg-day);
+      color: var(--text-day);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: var(--header-bg-night);
+    }
+    body.day-mode header {
+      background-color: var(--header-bg-day);
+    }
+    header .controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .mode-btn, .lang-btn {
+      background: transparent;
+      border: 2px solid currentColor;
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.3s;
+      color: var(--text-night);
+    }
+    body.day-mode .mode-btn,
+    body.day-mode .lang-btn {
+      color: var(--text-day);
+    }
+    .mode-btn:hover, .lang-btn:hover {
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+    }
+    main {
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      background: transparent;
+      color: inherit;
+      border: 2px solid currentColor;
+      padding: 0.5rem 1.5rem;
+      margin: 0 0.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s, color 0.3s;
+    }
+    .tab-btn.active {
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+    }
+    .section {
+      display: none;
+      max-width: 500px;
+      margin: auto;
+      padding: 2rem;
+      border-radius: 16px;
+      background-color: var(--section-bg-night);
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    }
+    body.day-mode .section {
+      background-color: var(--section-bg-day);
+    }
+    .section.active {
+      display: block;
+    }
+    .btn {
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: white;
+      transition: 0.3s;
+    }
+    .timer-display {
+      font-size: 2rem;
+      margin: 1rem 0;
+    }
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 70px;
+      border-radius: 5px;
+      border: none;
+      margin: 0 5px;
+    }
+    .illustration {
+      width: 100px;
+      margin-top: 1rem;
+      filter: drop-shadow(0 0 10px #ae30ff88);
+    }
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-wrapper">
+      <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ae30ff"/>
+            <stop offset="100%" stop-color="#3dd7ff"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#grad)" d="M40,20c5,10,20,5,30,20s-5,30-20,30S20,60,25,40C30,25,35,10,40,20Z" />
+      </svg>
+      <h1 id="main-title">Screen Time Manager</h1>
+    </div>
+    <div class="controls">
+      <button id="mode-toggle" class="mode-btn">Light ☀️ / Dark 🌙</button>
+      <button class="lang-btn" onclick="setLanguage('en')">En</button>
+      <button class="lang-btn" onclick="setLanguage('ar')">Ar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active" id="usage-tab" onclick="showTab('usage')">Usage Tracker</button>
+      <button class="tab-btn" id="break-tab" onclick="showTab('break')">Break Timer</button>
+    </div>
+
+    <div id="usage" class="section active">
+      <h2 id="track-title">⏱️ Track Screen Usage</h2>
+      <div id="usage-timer" class="timer-display">00:00</div>
+      <button class="btn" id="start-usage">Start</button>
+      <button class="btn" id="stop-usage">Stop</button>
+      <button class="btn" id="reset-usage">Reset</button>
+      <div id="usage-message"></div>
+      <img class="illustration" src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="timer illustration">
+    </div>
+
+    <div id="break" class="section">
+      <h2 id="break-title">🕒 Set a Break Reminder</h2>
+      <label id="input-label">
+        Time:
+        <input type="number" id="break-hours" placeholder="h" min="0" /> :
+        <input type="number" id="break-minutes" placeholder="m" min="0" /> :
+        <input type="number" id="break-seconds" placeholder="s" min="1" />
+      </label>
+      <br><br>
+      <button class="btn" id="start-break-timer">Start Countdown</button>
+      <div id="countdown-display" class="timer-display"></div>
+      <div id="break-message"></div>
+      <img class="illustration" src="https://cdn-icons-png.flaticon.com/512/3064/3064162.png" alt="break illustration">
+    </div>
+  </main>
+
+  <audio id="alert-sound" src="microwave-timer-117077.mp3" preload="auto"></audio>
+
+  <script>
+    let usageSeconds = 0;
+    let usageInterval = null;
+    let countdownInterval = null;
+    let remainingSeconds = 0;
+    let currentLang = 'en';
+
+    const lang = {
+      en: {
+        title: "Screen Time Manager",
+        track: "⏱️ Track Screen Usage",
+        break: "🕒 Set a Break Reminder",
+        label: "Time:",
+        usageTab: "Usage Tracker",
+        breakTab: "Break Timer",
+        tracking: "Tracking started...",
+        result: (m, s) => `You spent ${m} minutes and ${s} seconds on screen.`,
+        invalid: "Please enter a valid time.",
+        set: () => `Countdown started...`,
+        triggered: "Break reminder triggered. Well done for taking care of yourself!",
+        alert: "⏰ Time to take a break! Stretch, hydrate, and rest your eyes."
+      },
+      ar: {
+        title: "مدير وقت الشاشة",
+        track: "⏱️ تتبع وقت الشاشة",
+        break: "🕒 تعيين تذكير للاستراحة",
+        label: "الوقت:",
+        usageTab: "متابعة الاستخدام",
+        breakTab: "مؤقت الاستراحة",
+        tracking: "بدأ التتبع...",
+        result: (m, s) => `لقد قضيت ${m} دقيقة و${s} ثانية أمام الشاشة.`,
+        invalid: "من فضلك أدخل وقت صحيح.",
+        set: () => `تم بدء العد التنازلي...`,
+        triggered: "تم تشغيل التذكير. أحسنت برعاية نفسك!",
+        alert: "⏰ حان وقت الاستراحة! تمدد، اشرب ماء، وأرح عينيك."
+      }
+    };
+
+    function setLanguage(l) {
+      currentLang = l;
+      document.getElementById("main-title").textContent = lang[l].title;
+      document.getElementById("track-title").textContent = lang[l].track;
+      document.getElementById("break-title").textContent = lang[l].break;
+      document.getElementById("input-label").childNodes[0].textContent = lang[l].label + ' ';
+      document.getElementById("usage-tab").textContent = lang[l].usageTab;
+      document.getElementById("break-tab").textContent = lang[l].breakTab;
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+    }
+
+    document.getElementById("start-usage").onclick = () => {
+      if (!usageInterval) {
+        usageInterval = setInterval(() => {
+          usageSeconds++;
+          const min = Math.floor(usageSeconds / 60);
+          const sec = usageSeconds % 60;
+          document.getElementById("usage-timer").textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }, 1000);
+        document.getElementById("usage-message").textContent = lang[currentLang].tracking;
+      }
+    };
+
+    document.getElementById("stop-usage").onclick = () => {
+      clearInterval(usageInterval);
+      usageInterval = null;
+      const min = Math.floor(usageSeconds / 60);
+      const sec = usageSeconds % 60;
+      document.getElementById("usage-message").textContent = lang[currentLang].result(min, sec);
+    };
+
+    document.getElementById("reset-usage").onclick = () => {
+      clearInterval(usageInterval);
+      usageInterval = null;
+      usageSeconds = 0;
+      document.getElementById("usage-timer").textContent = "00:00";
+      document.getElementById("usage-message").textContent = "";
+    };
+
+    document.getElementById("start-break-timer").onclick = () => {
+      const h = parseInt(document.getElementById("break-hours").value) || 0;
+      const m = parseInt(document.getElementById("break-minutes").value) || 0;
+      const s = parseInt(document.getElementById("break-seconds").value) || 0;
+      remainingSeconds = h * 3600 + m * 60 + s;
+
+      if (remainingSeconds < 1) {
+        document.getElementById("break-message").textContent = lang[currentLang].invalid;
+        return;
+      }
+
+      document.getElementById("break-message").textContent = lang[currentLang].set();
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        const hr = Math.floor(remainingSeconds / 3600);
+        const min = Math.floor((remainingSeconds % 3600) / 60);
+        const sec = remainingSeconds % 60;
+        document.getElementById("countdown-display").textContent =
+          `${String(hr).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+
+        if (remainingSeconds <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById("alert-sound").play();
+          alert(lang[currentLang].alert);
+          document.getElementById("break-message").textContent = lang[currentLang].triggered;
+        }
+        remainingSeconds--;
+      }, 1000);
+    };
+
+    document.getElementById("mode-toggle").onclick = () => {
+      document.body.classList.toggle("day-mode");
+    };
+  </script>
+</body>
+</html>
